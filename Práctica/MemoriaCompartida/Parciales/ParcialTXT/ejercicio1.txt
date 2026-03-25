@@ -1,0 +1,31 @@
+1. SEMÁFOROS. Existen 15 sensores de temperatura y 2 módulos centrales de procesamiento. 
+Un sensor mide la temperatura cada cierto tiempo (función medir()), la envía al módulo central
+para que le indique qué acción debe hacer (un número del 1 al 10) (función determinar() para 
+el módulo central) y la hace (función realizar()). Los módulos atienden las mediciones por orden de llegada.
+
+sem mutex_cola = 1
+sem hay_p = 0
+int temperaturas[15]
+int resultados[15]
+
+process Sensor[id:1..15]
+
+	temperaturas[id] = medir()
+	P(mutex_cola)
+		cola.push(id)
+		P(hay_p)
+	V(mutex_cola)
+	P(esperando[id])
+	resultado = resultados[id]
+	realizar(resultado)
+
+process ModuloCentral[1..2]
+	while(true)
+		P(hay_p)
+		P(mutex_cola)
+			int prox = cola.pop()
+		V(mutex_cola)
+		int temp = temperaturas[prox]
+		int result = determinar(temp)
+		resultados[result]
+		v(esperando[prox])

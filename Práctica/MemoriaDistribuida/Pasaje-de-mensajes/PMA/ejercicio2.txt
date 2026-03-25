@@ -1,0 +1,40 @@
+chan llegada(int)
+chan cajero_elegido[N](int)
+chan cola_cajero[5](int, text)
+chan comprobantes[5](text)
+chan cajero_termino(int)
+
+process Cliente[id: 0..P-1]
+    int id_cajero
+    text datos_pago
+    text comprobante
+
+    send llegada(id)
+    receive cajero_elegido[id](id_cajero)
+    send cola_cajero[id_cajero](id, datos_pago)
+    receive comprobantes[id_cajero](comprobante)
+
+process Cajero[id: 0..4]
+    int id_cliente
+    text datos_pago
+    text comprobante
+
+    while(true)
+        receive cola_cajero[id](id_cliente, datos_pago)
+        comprobante = procesarDatos(datos_pago)
+        send comprobantes[id](comprobante)
+        send cajero_termino(id)
+
+process Coordinador
+    int cant_personas[5] = 0
+    int id_cliente
+    int id_cajero
+
+    while(true)
+        receive llegada(id_cliente)
+        while (not cajero_termino.isEmpty())
+            receive cajero_termino(id_cajero)
+            cant_personas[id_cajero]--
+        id_cajero = filaMinima(cant_personas)
+        send cajero_elegido[id_cliente](id_cajero)
+        cant_personas[id_cajero]++

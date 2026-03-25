@@ -1,0 +1,62 @@
+process Alumno[id: 0..44]
+    text enunciado
+    int nota
+
+    Aula.llegada(enunciado)
+    --resolver enunciado
+    Aula.finalizar(enunciado, nota)
+
+process Preceptor
+    text enunciado = ...
+
+    Aula.darEnunciado(enunciado)
+
+process Profesora 
+
+    for i = 0 to 44
+        text examen
+        int id_aux
+        Aula.esperarEntrega(examen, id_aux)
+        int nota = corregirExamen(examen)
+        Aula.entregarNota(nota, id_aux)
+
+Monitor Aula
+    cola cola_alumnos
+    cond corregido
+    cond hay_entrega
+    cond llegaron
+    cond enunciado_listo
+    text enunciado_aux
+    text examenes[45]
+    int alumnos = 0
+    int notas[45]
+
+    procedure llegada(text enunciado:out)
+        alumnos++
+        if (alumnos == 45)
+            signal(llegaron)
+        wait(enunciado_listo)
+        enunciado = enunciado_aux
+
+    procedure darEnunciado(text enunciado:in)
+        if (alumnos < 45)
+            wait(llegaron)
+        enunciado_aux = enunciado
+        signal_all(enunciado_listo)
+
+    procedure finalizar(int id:in; text examen:int; int nota:out)
+        cola_alumnos.push(id)
+        examenes[id] = examen
+        signal(hay_entrega)
+        wait(corregido)
+        nota = notas[id]
+
+    procedure esperarEntrega(text examen:out; int id:out)
+        if (cola_alumnos.isEmpty())
+            wait(hay_entrega)
+        id = cola_alumnos.pop()
+        examen = examenes[id]
+    
+    procedure entregarNota(int nota:in; int id:in)
+        notas[id] = nota
+        signal(corregido)

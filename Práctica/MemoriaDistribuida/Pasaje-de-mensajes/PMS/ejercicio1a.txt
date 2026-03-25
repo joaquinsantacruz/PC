@@ -1,0 +1,9 @@
+process Examinador[id: 0..R-1]
+    Admin!(sitioWeb)
+
+process Analizador
+    Admin?(sitioWeb)
+
+process Admin
+    Examinador?(sitioWeb)
+    Analizador!(sitioWeb)

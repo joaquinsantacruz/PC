@@ -1,0 +1,25 @@
+sem mutex
+sem esperando[P]
+Cola terminales
+Cola cola
+int terminales_disponibles = T
+
+process Persona[id: 0..P-1]
+    P(mutex)
+    if (terminales_disponibles == 0)
+        cola.push(id)
+        V(mutex)
+        P(esperando[id])
+    terminales_disponibles--
+    int terminal_aux = terminales.pop()
+    V(mutex)
+
+    UsarTerminal(terminal_aux)
+
+    P(mutex)
+    terminales.push(terminal_aux)
+    if (cola.isEmpty())
+        terminales_disponibles++
+    else
+        V(esperando[cola.pop()])
+    V(mutex)

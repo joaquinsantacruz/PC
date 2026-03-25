@@ -1,0 +1,64 @@
+Monitor Admin
+    Cola examenes
+    Cola correciones
+    cond barrera
+    cond esperar_alumnos
+    int llegaron = 0
+    text enunciado
+    int entregaron = 0
+    cond entrega
+    cond correccion
+
+    procedure entregarEnunciado(e: in text)
+        if (llegaron < 45)
+            wait(esperar_alumnos)
+        enunciado = e
+        signal_all(barrera)
+
+    procedure llegada(e: out text)
+        llegaron++
+        if (llegaron == 45)
+            signal(esperar_alumnos)
+        wait(barrera)
+        e = enunciado
+
+    procedure entregarExamen(examen: in text; nota: out int)
+        examenes.push(examen)
+        entregaron++
+        signal(entrega)
+        wait(correccion)
+        nota = correcciones.pop()
+    
+    procedure recibirExamen(examen: out text)
+        if (entregaron == 0)
+            wait(entrega)
+        examen = examenes.pop()
+        entregaron--
+
+    procedure entregarNota(nota: in int)
+        correcciones.push(nota)
+        signal(correccion)
+
+process Preceptor
+    text enunciado
+
+    Admin.entregarEnunciado(enunciado)
+
+process Profesora
+    text examen
+    int nota
+
+    for i = 1 to 45
+        Admin.recibirExamen(examen)
+        nota = corregirExamen(examen)
+        Admin.entregarNota(nota)
+
+
+process Alumno[id:0..44]
+    text enunciado
+    text examen
+    int nota
+
+    Admin.llegada(enunciado)
+    examen = resolverEnunciado(enunciado)
+    Admin.entregarExamen(examen, nota)

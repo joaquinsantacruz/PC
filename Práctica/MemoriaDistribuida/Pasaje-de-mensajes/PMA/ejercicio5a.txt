@@ -1,0 +1,15 @@
+chan documentos(text)
+
+process Administrativo[id: 1..N]
+    text documento
+
+    while(true)
+        documento = trabajar()
+        send documentos(documento)
+
+process Impresora[id: 0..2]
+    text documento
+    
+    while(true)
+        receive documentos(documento)
+        imprimir(documento)

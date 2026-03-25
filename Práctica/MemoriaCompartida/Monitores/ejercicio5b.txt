@@ -1,0 +1,66 @@
+procedure Cliente[id: 1..N]
+	text lista
+	text comprobante
+	int idE
+
+	Corralon.llegada(idE)
+	Escritorio[idE].atenderme(lista, comprobante)
+
+procedure Empleado[id: 1..E]
+	text lista
+	text comprobante
+
+	while(true)
+		Corralon.proximo(id)
+		Escritorio[id].recibirLista(lista)
+		comprobante = generarComprobante(lista)
+		Escritorio[id].entregarComprobante(comprobante)
+
+Monitor Corralon
+	Cola empleados
+	int esperando = 0
+	int empleados_libres = 0
+	cond espera
+
+	procedure llegada(int idE:out)
+		if (empleados_libres == 0)
+			esperando++
+			wait(espera)
+		else
+			empleados_libres--
+		idE = empleados.pop()
+
+	procedure proximo(int idE:in)
+		empleados.push(idE)
+		if (esperando > 0)
+			signal(espera)
+			esperando--
+		else
+			empleados_libres++
+
+Monitor Escritorio[id:1..E]
+	text lista
+	text comprobante
+	boolean datos = false
+	cond lista_entregada
+	cond comprobante_entregado
+	cond recibio_comprobante	
+
+	procedure atenderme(text l:in; text c:out)
+		lista = l
+		datos = true
+		signal(lista_entregada)
+		wait(comprobante_entregado)
+		c = comprobante
+		signal(recibio_comprobante)
+
+	procedure recibirLista(text l:out)
+		if (not datos)
+			wait(lista_entregada)
+		l = lista
+	
+	procedure entregarComprobante(text c:in)
+		comprobante = c
+		signal(comprobante_entregado)
+		wait(recibio_comprobante)
+		datos = false

@@ -1,0 +1,25 @@
+process Analizador
+    text sitioWeb
+    
+    while(true)
+        Admin!()
+        Admin?(sitioWeb)
+        procesarSitioWeb(sitioWeb)
+
+
+process Examinador[id: 0..R-1]
+    text sitioWeb
+    boolean infectado
+
+    while(true)
+        sitioWeb = buscarSitioWebInfectado()
+        Admin!(sitioWeb)
+
+
+process Admin
+    Cola cola
+    text sitioWeb
+
+    do Examinador?(sitioWeb) -> cola.push(sitioWeb)
+    [] not cola.isEmpty(): Analizador?() -> Analizador!(cola.pop())
+    od

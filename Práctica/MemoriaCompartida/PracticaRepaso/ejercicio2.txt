@@ -1,0 +1,21 @@
+text transacciones[10000]
+int resultados[10000] = 0
+int cant_resultados[10] = 0
+int terminaron = 0
+sem mutex_terminaron = 1
+
+process Worker[id: 0..6]
+    int inicio = 10000 DIV 7 * id
+    int area = 10000 DIV 7
+    if (id == 6)
+        area += 10000 MOD 7
+    
+    for i=inicio to inicio + area
+        resultados[i] = Validar(transacciones[i])
+    
+    P(mutex_terminaron)
+    terminaron++
+    if (terminaron == 7)
+        for i=0 to 10000
+            cant_resultados[resultados[i]]++
+    V(mutex_terminaron)

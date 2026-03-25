@@ -1,0 +1,24 @@
+Monitor Admin
+    cond turno
+    boolean libre = true
+    int esperando = 0
+
+    procedure llegada()
+        if (libre)
+            libre = false
+        else
+            esperando++
+            wait(turno)
+            esperando--
+    
+    procedure salida()
+        if (esperando > 0)
+            signal(turno)
+        else
+            libre = true
+
+
+process Escalador[id: 1..30]
+    Admin.llegada()
+    usarPaso()
+    Admin.salida()

@@ -1,0 +1,32 @@
+process Alumno[id: 0..N-1]
+    text examen
+    text resolucion
+    int nota
+
+    resolucion = resolverExamen(examen)
+    Coordinador!(id, resolucion)
+    Coordinador?(nota)
+
+process Profesor
+    text examen
+    int id_alumno
+    int nota
+
+    for i=1 to N
+        Coordinador?(id_alumno, examen)
+        nota = corregirExamen(examen)
+        Alumno[id_alumno]!(nota)
+
+process Coordinador
+    Cola examenes
+    int id_alumno
+    text examen
+    int entregaron = 0
+
+    do entregaron < N; Alumno[*]?(id_alumno, examen) -> 
+        entregaron++
+        examenes.push(id_alumno, examen)
+    [] not examenes.isEmpty(); Profesor?() -> 
+        id_alumno, examen = examenes.pop()
+        Profesor!(id_alumno, examen)
+    od

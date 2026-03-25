@@ -1,0 +1,37 @@
+process PrimerEmpleado
+    text muestra
+
+    while(true)
+        muestra = prepararMuestra()
+        Coordinador!(muestra)
+
+process Coordinador
+    Cola cola
+    text muestra
+
+    while(true)
+        do PrimerEmpleado?(muestra) -> cola.push(muestra)
+        [] not cola.isEmpty(): SegundoEmpleado?() -> SegundoEmpleado!(cola.pop())
+        od
+
+process SegundoEmpleado
+    text muestra
+    text set
+    text resultado
+
+    while(true)
+        Coordinador!()
+        Coordinador?(muestra)
+        set = armarSet(muestra)
+        TercerEmpleado!(set)
+        TercerEmpleado?(resultado)
+        archivarResultado(resultado)
+
+process TercerEmpleado
+    text set
+    text resultado
+
+    while(true)
+        SegundoEmpleado?(set)
+        resultado = realizarAnalisis(set)
+        SegundoEmpleado!(resultado)

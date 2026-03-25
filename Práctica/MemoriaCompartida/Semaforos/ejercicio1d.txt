@@ -1,0 +1,8 @@
+sem mutex = 3
+
+process Persona[id: 0..N-1]:
+    int cant = random()
+    for i = 1 to cant
+        P(mutex)
+        usarDetector()
+        V(mutex)

@@ -1,0 +1,12 @@
+Fallo[N] fallos
+
+process Checker[id: 0..3]:
+    area = N / 4
+    inicio = id * area
+    fin = inicio + area
+    if (id == 3)
+        fin += N mod 4
+    
+    for i = inicio to fin
+        if (fallos[i].gravedad == 3)
+            imprimir(fallos[i].ID)

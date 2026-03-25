@@ -1,0 +1,40 @@
+chan solicitud()
+chan pedido(int)
+chan cabina_lista[N](int)
+chan pagar_empleado(int, int)
+chan ticket_factura[N](text)
+
+process Cliente[id: 0..N-1]
+    int id_cabina
+    int monto_a_pagar
+    text ticket
+
+    send pedido(id)
+    send solicitud()
+
+    receive cabina_lista[id](id_cabina)
+    usarCabinaTelefonica(id_cabina: IN, monto_a_pagar: OUT)
+
+    send pagar_empleado(id_cabina, monto_a_pagar)
+    send solicitud()
+    receive ticket_factura(ticket)
+
+process Empleado
+    int id_cliente
+    int id_cabina
+    int monto
+    text ticket
+    Cola cabinas = {1,2,3,4,5,6,7,8,9,10}
+
+    while(true)
+        receive solicitud()
+
+        if (not empty(pagar_empleado) or cabinas.isEmpty())
+            receive pagar_empleado(id_cabina, monto)
+            cabinas.push(id_cabina)
+            ticket = Cobrar(id_cliente, id_cabina, monto)
+            send ticket_factura[id_cliente](ticket)
+        else
+            receive pedido(id_cliente)
+            id_cabina = cabinas.pop()
+            send cabina_lista[id_cliente](id_cabina)

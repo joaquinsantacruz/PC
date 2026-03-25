@@ -1,0 +1,30 @@
+Monitor Equipo[id: 0..3]
+    cond barrera
+    int llegaron = 0
+    int ventas = 0
+
+    procedure llegada()
+        llegaron++
+        if (llegaron < 4)
+            wait(barrera)
+        else
+            signal_all(barrera)
+    
+
+    procedure fin(cant_vendida: in int; cant_vendida_total: out int)
+        ventas += cant_vendida
+        llegaron--
+        if (llegaron > 0)
+            wait(barrera)
+        else
+            cant_vendida_total = ventas
+            signal_all(barrera)
+
+
+process Vendedor[id:0..3]
+    int equipo = ...
+    int ventas = 0
+    int ventas_total = 0
+    Equipo[equipo].llegada()
+    ventas = Vender()
+    Equipo[equipo].fin(ventas, ventas_total)

@@ -1,0 +1,29 @@
+Transaccion[10000] transacciones
+sem transacciones_mutex = 1
+sem salida = 1
+int[10] resultados = ([10] = 0)
+fin = 0
+
+
+process Worker[id: 0..6]
+    int area = 10000 / 7
+    int inicio = id * area
+    if (id = 6)
+        area += 10000 mod 7
+    int fin = inicio + area - 1
+    int[10] resultados_aux = ([10] = 0)
+
+    for i = inicio to fin
+        resultados_aux[Validar(transacciones[i])]++
+    
+    for i = 0 to 9
+        P(transacciones_mutex)
+        resultados[i] += resultados_aux[i]
+        V(transacciones_mutex)
+
+    P(salida)
+    fin++
+    if (fin = 7)
+        for i = 0 to 9
+            informar(resultados[i])
+    V(salida)

@@ -1,0 +1,27 @@
+3. MONITORES. Por un puente turístico puede pasar sólo un auto a la vez. Hay N autos que quieren pasar 
+(función pasar()) y lo hacen por orden de llegada.
+
+Monitor Admin
+    cond turno
+    boolean libre = false
+    int esperando = 0
+
+    procedure llegada()
+        if (libre)
+            libre = false
+        else
+            esperando++
+            wait(turno)
+            esperando--
+    
+    procedure salida()
+        if (esperando == 0)
+            libre = true
+        else
+            signal(turno)
+
+
+procedure Auto[id: 0..N-1]
+    Admin.llegada()
+    pasar()
+    Admin.salida()

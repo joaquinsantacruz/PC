@@ -1,0 +1,21 @@
+process Persona[id: 1..P]
+    Coordinador!llegada(id)
+    Coordinador?acceso()
+    usarTerminal()
+    Coordinador!salida()
+
+
+process Coordinador
+    Cola personas
+    int id_persona
+    boolean libre = true
+
+    do libre; Persona[*]?llegada(id_persona) ->
+        Persona[id_persona]!acceso()
+        libre = false
+    [] not libre; Persona[*]?llegada(id_persona) ->
+        personas.push(id_persona)
+    [] personas.isEmpty(); Persona[*]?salida() ->
+        libre = true
+    [] not personas.isEmpty(); Persona[*]?salida() ->
+        Persona[personas.pop()]!acceso()

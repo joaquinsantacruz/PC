@@ -1,0 +1,28 @@
+process Persona[id: 0..N-1]
+    Mesa.llegada(id, anciana, embarazada)
+    Votar()
+    Mesa.salida()
+
+process AutoridadDeMesa
+    for i = 0 to N-1
+        Mesa.darAcceso()
+
+Monitor Mesa
+    ColaEspecial cola
+    cond fila[N]
+    cond empleado
+    cond voto
+
+    procedure llegada(int id:in; boolean anciana:in; boolean embarazada:in)
+        cola.push(id,anciana,embarazada)
+        signal(empleado)
+        wait(fila[id])
+    
+    procedure darAcceso()
+        if (cola.isEmpty())
+            wait(empleado)
+        signal(fila[cola.pop()])
+        wait(voto)
+    
+    procedure salida()
+        signal(voto)

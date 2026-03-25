@@ -1,0 +1,73 @@
+sem vehiculo_esperando = 0
+sem fila_mutex = 1
+Cola fila
+
+sem hay_vehiculo[7] = ([7] = 0)
+sem colas_mutex[7] = ([7] = 1)
+Cola[7] colas
+
+sem cant_vehiculos_mutex
+int[7] cant_vehiculos = ([7] = 0)
+
+sem atencion[150] = ([150] = 0)
+text[150] comprobantes
+int[150] estacion_elegida
+
+process Vehiculo[id: 0..149]
+    int estacion
+    text comprobante
+
+    P(fila_mutex)
+    fila.push(id)
+    V(fila_mutex)
+
+    V(vehiculo_esperando)
+    P(atencion[id])
+
+    estacion = estacion_elegida[150]
+
+    P(colas_mutex[estacion])
+    colas[estacion].push(id)
+    V(colas_mutex[estacion])
+
+    v(hay_vehiculo[estacion])
+
+    P(atencion[id])
+    comprobante = comprobantes[id]
+
+    P(cant_vehiculos_mutex)
+    cant_vehiculos[estacion]--
+    V(cant_vehiculos_mutex)
+
+process Coordinador
+    int id_vehiculo
+    int estacion
+
+    for i = 1 to 150
+        P(vehiculo_esperando)
+        P(fila_mutex)
+        id_vehiculo = fila.pop()
+        V(fila_mutex)
+
+        P(cant_vehiculos_mutex)
+        estacion = indexMin(cant_vehiculos)
+        cant_vehiculos[estacion]++
+        V(cant_vehiculos_mutex)
+
+        estacion_elegida[id_vehiculo] = estacion
+        V(atencion[id_vehiculo])
+
+        
+
+process Estacion[id: 0..6]
+    int id_vehiculo
+    
+    while(true)
+        P(hay_vehiculo[id])
+
+        P(colas_mutex[id])
+        id_vehiculo = colas[id].pop()
+        V(colas_mutex[id])
+
+        comprobantes[id_vehiculo] = revisarVehiculo(id_vehiculo)
+        V(revision[id_vehiculo])

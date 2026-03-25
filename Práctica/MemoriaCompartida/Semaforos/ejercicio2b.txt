@@ -1,0 +1,21 @@
+Fallo[N] fallos
+int[4] cant_fallos
+sem mutex = 1
+
+process Checker[id: 0..3]:
+    area = N / 4
+    inicio = id * area
+    fin = inicio + area
+    if (id == 3)
+        fin += N mod 4
+    
+    int[area] cant_fallos_local
+    inicializarVector(cant_fallos_local)
+    
+    for i = inicio to fin
+        cant_fallos_local[fallos[i].gravedad] += 1
+    
+    P(mutex)
+    for i=0 to 3
+        cant_fallos[i] = cant_fallos_local[i]
+    V(mutex)

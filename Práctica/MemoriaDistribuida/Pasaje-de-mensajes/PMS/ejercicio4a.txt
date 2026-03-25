@@ -1,0 +1,13 @@
+process Persona[id: 1..P]
+    Empleado!solicitarTurno(id)
+    Empleado?habilitarTurno()
+    usarSimulador()
+    Empleado!liberarTurno()
+
+process Empleado
+    int id_persona
+    
+    while(true)
+        Persona[*]?solicitarTurno(id_persona)
+        Persona[id_persona]!habilitarTurno()
+        Persona[id_persona]?liberarTurno()

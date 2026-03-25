@@ -1,0 +1,6 @@
+sem mutex = 3
+
+process Persona[id: 0..N-1]:
+    P(mutex)
+    usarDetector()
+    V(mutex)

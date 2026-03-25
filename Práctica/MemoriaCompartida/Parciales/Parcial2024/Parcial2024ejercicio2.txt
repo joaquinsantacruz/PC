@@ -1,0 +1,24 @@
+Monitor Admin
+    cond turno
+    int esperando = 0
+    boolean libre = true
+
+    procedure llegada()
+        if (libre)
+            libre = false
+        else
+            esperando++
+            wait(turno)
+        
+    procedure salida()
+        if (esperando > 0)
+            signal(turno)
+            esperando--
+        else
+            libre = true
+
+
+process Persona[id: 0..N-1]
+    Admin.llegada()
+    mirar()
+    Admin.salida()

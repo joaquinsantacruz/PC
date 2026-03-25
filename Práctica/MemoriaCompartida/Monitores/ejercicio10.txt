@@ -1,0 +1,38 @@
+process Persona[id: 0..N]
+    Juego.solicitarUso()
+    Usar_juego()
+    Juego.devolver()
+
+process Empleado
+    for i=1 to N
+        Juego.reservarAcceso()
+        Desinfectar_Juego()
+        Juego.darAcceso()
+    
+Monitor Juego
+    boolean sucio = true
+    boolean ocupado = false
+    boolean limpiando = false
+    cond empleado
+    cond turno
+
+    procedure solicitarUso()
+        if (sucio or ocupado or limpiando)
+            wait(turno)
+        ocupado = true
+
+    procedure devolver()
+        ocupado = false
+        sucio = true
+        signal(empleado)
+
+    procedure reservarAcceso()
+        if (ocupado)
+            wait(empleado)
+        limpiando = true
+    
+    procedure darAcceso()
+        sucio = false
+        limpiando = false
+        signal(turno)
+        wait(empleado)

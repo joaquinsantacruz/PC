@@ -1,0 +1,22 @@
+chan documentos(text)
+chan impresiones[100](text)
+
+process Empleado[id: 1..100]
+    text documento
+    text impresion
+
+    while (true)
+        documento = trabajar()
+        send documentos(id, documento)
+        receive impresiones(impresion)
+
+
+process Impresora[id: 1..5]
+    text documento
+    text impresion
+    int id_empleado
+
+    while(true)
+        receive documentos(id_empleado, documento)
+        impresion = imprimir(documento)
+        send impresiones[id_empleado](impresion)

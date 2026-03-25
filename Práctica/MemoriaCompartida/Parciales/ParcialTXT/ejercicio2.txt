@@ -1,0 +1,50 @@
+2. MONITORES. Una boletería vende E entradas para un partido, y hay P personas (P>E) que quieren comprar.
+Se las atiende por orden de llegada. La boletería debe informarle a la persona que no hay más entradas 
+disponibles o devolverle el número de entrada si pudo hacer la compra.
+
+Monitor Admin
+    int entradas = 1
+
+    cond turno
+    cond compra
+    cond venta
+    boolean libre = true
+
+    int entrada
+    text result_entrada
+
+    procedure comprar(e: out int; re: out text)
+        if (libre)
+            libre = false
+        else
+            wait(turno)
+        signal(compra)
+        wait(venta)
+        
+        e = entrada
+        re = result_entrada
+
+        signal(turno)
+
+    
+    procedure venta(e: in int)
+        if (libre)
+            wait(compra)
+        if (entradas <= E)
+            entrada = e
+            entradas++
+        else
+            result_entrada = 'No hay entradas disponibles'
+        signal(venta)
+
+process Persona[id: 0..P-1]
+    int entrada
+    text result_entrada
+
+    Admin.comprar(entrada, result_entrada)
+
+
+process Boletería
+
+    while(true)
+        Admin.venta(entradas)

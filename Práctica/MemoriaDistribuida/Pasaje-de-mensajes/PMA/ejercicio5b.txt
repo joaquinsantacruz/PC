@@ -1,0 +1,40 @@
+chan pedido()
+chan documentos(text)
+chan documentos_impresora(text)
+
+process Administrativo[id: 1..N]
+    text documento
+
+    while(true)
+        documento = trabajar()
+        send documentos(documento)
+        send pedido()
+
+process Directivo
+    text documento
+
+    while(true)
+        documento = trabajar()
+        send documentos_directivo(documento)
+        send pedido()
+
+process Impresora[id: 0..2]
+    text documento
+    
+    while(true)
+        receive documentos_impresora(documento)
+        imprimir(documento)
+
+process Coordinador
+    text documento
+
+    while(true)
+        receive pedido()
+
+        if (not empty(documentos_directivo))
+            receive documentos_directivo(documento)
+        else
+            receive documentos(documento)
+        send documentos_impresora(documento)
+        
+            

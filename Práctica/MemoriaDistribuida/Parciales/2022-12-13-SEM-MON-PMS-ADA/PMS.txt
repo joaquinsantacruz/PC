@@ -1,0 +1,23 @@
+process Estudiante[id: 0..1]
+    text comida
+    
+    Coordinador!llegada(id)
+    Coordinador?adelante()
+    usarMicroondas(comida)
+    Coordinador!salida()
+
+process Coordinador
+    Cola estudiantes
+    int id_estudiante
+    boolean libre = true
+
+    do libre; Estudiante[*]?llegada(id_estudiante) ->
+            Estudiante[id_estudiante]!adelante()
+            libre = false
+    [] not libre; Estudiante[*]?llegada(id_estudiante) ->
+            estudiantes.push(id_estudiante)
+    [] Estudiante[*]?salida() ->
+        if (estudiantes.isEmpty())
+            libre = true
+        else
+            Estudiante[estudiantes.pop()]!adelante()

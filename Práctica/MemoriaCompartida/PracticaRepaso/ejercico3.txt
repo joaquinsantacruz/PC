@@ -1,0 +1,34 @@
+int cant_latas_restantes = 100
+boolean libre = true
+Cola usuarios
+sem esperando[U] = 0, cola_mutex = 1, avisar_empleado = 0, esperar_recarga = 0
+
+process Usuario[id: 0..U]
+    P(cola_mutex)
+    if (not libre)
+        usuarios.push(id)
+        V(cola_mutex)
+        P(esperando[id])
+    else
+        libre = false
+        V(cola_mutex)
+    
+    if (cant_latas_restantes == 0)
+        V(avisar_empleado)
+        P(esperar_recarga)
+    
+    --tomar lata
+    cant_latas_restantes--
+
+    P(cola_mutex)
+    if (usuarios.isEmpty())
+        libre = true
+    else
+        V(esperando[usuarios.pop()])
+    V(cola_mutex)
+
+process Repositor
+    while (true)
+        P(avisar_empleado)
+        cant_latas_restantes = 100
+        V(esperar_recarga)

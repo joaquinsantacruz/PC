@@ -1,0 +1,23 @@
+process Persona[id: 1..P]
+    Admin!solicitarTurno(id)
+    Empleado?habilitarTurno()
+    usarSimulador()
+    Empleado!liberarTurno()
+
+process Empleado
+    int id_persona
+    
+    while(true)
+        Admin!listo()
+        Admin?darTurno(id_persona)
+        Persona[id_persona]!habilitarTurno()
+        Persona[id_persona]?liberarTurno()
+
+process Admin
+    Cola personas
+    int id_persona
+
+    do Persona[*]?solicitarTurno(id_persona) ->
+        personas.push(id_persona)
+    [] not personas.isEmpty(); Empleado?listo() ->
+        Empleado!darTurno(personas.pop())

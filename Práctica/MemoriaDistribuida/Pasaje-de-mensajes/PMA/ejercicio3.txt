@@ -1,0 +1,50 @@
+chan cliente_pedido_cocinero(ind, text)
+chan pedidos[C](Plato)
+chan vendedor_listo(int)
+chan cliente_pedido_coordinador[3](int, text)
+chan cliente_pedido(int, text)
+
+process Cocinero[id: 0..1]
+    int id_cliente
+    text pedido
+    Plato plato
+
+    while(true)
+        receive cliente_pedido_cocinero(id_cliente, pedido)
+        plato = cocinar(pedido)
+        send pedidos[id_cliente](plato)
+
+
+process Vendedor[id: 0..2]
+    int id_cliente
+    text pedido
+
+    while(true)
+        send vendedor_listo(id_vendedor)
+        receive cliente_pedido_coordinador[id](id_cliente, pedido)
+        if (id_cliente == -1)
+            delay(random(60, 180))      // Reponer pack de bebidas
+        else
+            send cliente_pedido_cocinero(id_cliente, pedido)
+
+
+process Cliente[id: 0..C-1]
+    text pedido
+    Plato plato
+
+    send cliente_pedido(id, pedido)
+    receive pedidos[id](plato)
+
+
+process Coordinador
+    int id_vendedor
+    int id_cliente
+    text pedido
+
+    while(true)
+        receive vendedor_listo(id_vendedor)
+        if (cliente_pedido.isEmpty())
+            send cliente_pedido_coordinador[id_vendedor](-1, "Vacio")
+        else
+            receive cliente_pedido(id_cliente, pedido)
+            send cliente_pedido_coordinador[id_vendedor](id_cliente, pedido)

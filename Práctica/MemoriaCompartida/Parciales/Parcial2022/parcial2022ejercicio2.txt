@@ -1,0 +1,25 @@
+process Proceso[id: 0..19]
+    text resultado
+    int prioridad = getPrioridad()
+    while (true)
+        resultado = Procesar()
+        Sistema.solicitarAcceso(id, prioridad)
+        -- escribir(resultado)
+        Sistema.devolverAcceso()
+
+Monitor Sistema
+    ColaEspecial cola
+    cond turno[20]
+    boolean libre
+
+    procedure solicitarAcceso(int id:in; int prioridad:in)
+        if (not libre)
+            cola.push(id, prioridad)
+            wait(turno[id])
+        libre = false
+    
+    procedure devolverAcceso()
+        if (not cola.isEmpty())
+            signal(cola.pop())
+        else
+            libre = true

@@ -1,0 +1,69 @@
+process Alumno[id:1..50]
+	int grupo
+	int nota
+
+	Aula.llegada()
+	Aula.recibirGrupo(grupo)
+	--realizar tarea
+	Aula.finalizoTarea(grupo, nota)
+
+process JTP
+	int grupo_aux
+	int contador_tareas[25] = 0
+	int nota_final = 25
+	
+	Aula.esperarAlumnos()
+	for i=1 to 50
+		int aux = AsignarNroGrupo()
+		Aula.asignarGrupo(i, aux)
+
+	for i=1 to 50
+		Aula.recibirTarea(grupo_aux)
+		contador_tareas[grupo_aux]++
+		if (contador_tareas[grupo_aux] == 2)
+			Aula.corregir(grupo_aux, nota_final)
+			nota_final--
+		
+
+Monitor Aula
+	int llegaron = 0
+	cond espera_grupo[N]
+	int numero_grupo[N] = 0
+	cond barrera
+	cond termino
+	int terminaron
+
+	procedure llegada()
+		llegaron++
+		if (llegaron == 50)
+			signal_all(barrera)
+		else
+			wait(barrera)
+
+	procedure recibirGrupo(int id:int; int grupo:out)
+		if (numero_grupo[id] == 0)
+			wait(espera_grupo[id])
+		grupo = numero_grupo[id]
+
+	procedure esperarAlumnos()
+		if (llegaron != 50)
+			wait(barrera)
+	
+	procedure asignarGrupo(int id:in; int nro:in)
+		numero_grupo[id] = nro
+		signal(espera_grupo[id])
+
+	procedure finalizoTarea(int grupo:in; int nota:out)
+		cola.push(grupo)
+		signal(termino)
+		wait(corrigio[grupo])
+		nota = notas[grupo]
+
+	procedure recibirTarea(int grupo:out)
+		if (cola.isEmpty())
+			wait(termino)
+		grupo = cola.pop()
+
+	procedure corregir(int grupo:int; int nota:in)
+		notas[grupo] = nota
+		signal_all(corrigio[grupo])

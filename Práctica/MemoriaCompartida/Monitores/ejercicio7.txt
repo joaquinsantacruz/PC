@@ -1,0 +1,45 @@
+process Corredor[id:1..C]
+	Maraton.llegada()
+	--comenzar carrera
+	Maraton.usarMaquinaExpendedora()
+	--retirarse
+
+process Repositor
+	while(true)
+		esperarReponerMaquina()
+		--reponer maquina
+		maquinaRepositada()
+
+process Carrera
+	Maraton.comenzar()
+	
+Monitor Maraton
+	int llegaron
+	cond inicio
+	cond barrera
+	botellas = 20
+
+	procedure llegada()
+		llegaron++
+		if (llegaron == C)
+			signal(inicio)
+		wait(barrera)
+
+	procedure comenzar()
+		if (llegaron != C)
+			wait(inicio)
+		signal_all(barrera)
+
+	procedure usarMaquinaExpendedora(botella B:out)
+		if (botellas == 0)
+			signal(repositor)
+			wait(repositado)
+		--tomar botella B
+		signal(repositado)
+
+	procedure esperarReponerMaquina()
+		if (botellas != 0)
+			wait(repositor)
+	
+	procedure maquinaRepositada()
+		signal(repositado)

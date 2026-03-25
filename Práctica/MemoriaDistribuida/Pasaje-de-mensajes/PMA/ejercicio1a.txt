@@ -1,0 +1,16 @@
+chan cola(int)
+chan atencion[N](texto)
+
+process Cliente[id: 0..N-1]
+    texto aux
+
+    send cola(id)
+    receive atencion[id](aux)
+
+process Empleado
+    int id_cliente
+
+    while(true)
+        receive cola(id_cliente)
+        -- Atender cliente (id_cliente)
+        send atencion[id_cliente]("Listo")

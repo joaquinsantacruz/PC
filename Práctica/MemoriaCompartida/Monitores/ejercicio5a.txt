@@ -1,0 +1,43 @@
+process Cliente[id: 1..N]
+	text lista
+	text comprobante
+
+	Corralon.llegada(lista, comprobante)
+
+process Empleado
+	text lista
+	text comprobante
+	for i=1 to N
+		Corralon.recibirLista(lista)
+		comprobante = generarComprobante(lista)
+		Corralon.entregarComprobante(comprobante)
+
+Monitor Corralon
+	cond hay_gente
+	cond espera
+	int esperando = 0
+	Lista lista
+
+	procedure llegada(text l:in; text c:out)
+		esperando++
+		signal(hay_gente)
+		wait(espera)
+		lista = l
+		signal(entrega_cliente)
+		wait(entrega_empleado)
+		c = comprobante
+		esperando--
+		signal(termino)
+
+	procedure recibirLista(text l:in)
+		if (encontre == 0)
+			wait(hay_gente)
+		signal(espera)
+		wait(entrega_cliente)
+		l = lista
+
+	procedure entregarComprobante(text c:in)
+		comprobante = c
+		signal(entrega_empleado)
+		wait(termino)
+		

@@ -1,0 +1,33 @@
+chan cola(int)
+chan empleado_listo(int)
+chan cliente_a_atender[2](int)
+chan atencion[N](int)
+
+process Cliente[id: 0..N-1]
+    int id_empleado
+
+    send cola(id)
+    receive atencion[id](aux)
+
+process Empleado[id: 0..1]
+    int id_cliente
+
+    while(true)
+        send empleado_listo(id)
+        receive cliente_a_atender[id](id_cliente)
+        if (id_cliente == -1)
+            delay(900)      // Realiza tareas administrativas durante 15 minutos
+        else
+            --Atender cliente (id_cliente)
+            send atencion[id_cliente]("Listo")
+
+process Coordinador
+    int id_cliente, id_empleado
+    
+    while(true)
+        receive empleado_listo(id_empleado)
+        if (cola.isEmpty())
+            send cliente_a_atender[id_empleado](-1)
+        else
+            receive cola(id)
+            send cliente_a_atender[id_empleado](id_cliente)

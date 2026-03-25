@@ -1,0 +1,44 @@
+chan prioridadAncianos(id, text, double)
+chan prioridadBoletas(id, text, double)
+chan sinPrioridad(id, text, double)
+chan pedido()
+
+chan recibo[P](double, text)
+
+process Persona[id: 1..P]
+    boolean anciana = ...
+    int cant_boletas = ...
+    text boletas = ...
+    double dinero = ...
+    double vuelto
+    text recibos
+
+    if (anciana)
+        send prioridadAncianos(id, boletas, dinero)
+    elif (cant_boletas < 5)
+        send prioridadBoletas(id, boletas, dinero)
+    else
+        send sinPrioridad(id, boletas, dinero)
+    send pedido()
+    receive recibo[id](vuelto, recibos)
+
+
+process Caja
+    text boletas
+    text recibos
+    double dinero
+    double vuelto
+    int id_persona
+
+    while(true):
+        receive pedido() 
+
+        if (not empty(prioridadAncianos)):
+            receive prioridadAncianos(id_persona, boletas, dinero)
+        elif (not empty(prioridadBoletas)):
+            receive prioridadBoletas(id_persona, boletas, dinero)
+        else:
+            receive sinPrioridad(id_persona, boletas, dinero)
+
+        vuelto, recibos = cobrar(boletas, dinero)
+        send recibo[id_persona](vuelto, recibos)

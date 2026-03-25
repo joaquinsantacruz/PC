@@ -1,0 +1,26 @@
+process Proceso[id:1..20]
+	text resultados
+	int prioridad = ...	
+
+	resultados = Procesar()
+	Sistema.pedirAcceso(id, prioridad)
+	--escribir E/S resultados
+	Sistema.dejarAcceso()
+
+Monitor Sistema
+	ColaEspecial cola
+	cond procesos[20]
+	boolean libre = true
+
+	process pedirAcceso(int id:in; int prioridad:int)
+		if (!libre)
+			cola.push(id, prioridad)
+			wait(procesos[id])
+		else
+			libre = false
+		
+	process dejarAcceso()
+		if (!cola.isEmpty())
+			signal(procesos[cola.pop()])
+		else
+			libre = true

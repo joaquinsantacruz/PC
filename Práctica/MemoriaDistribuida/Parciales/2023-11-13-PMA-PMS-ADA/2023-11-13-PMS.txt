@@ -1,0 +1,34 @@
+process Empleado[id: 1..100]
+    text documento
+    text impresion
+    
+    while(true)
+        documento = trabajar()
+        Admin!(id, documento)
+        Impresora[*]?(impresion)
+
+
+process Impresora[id: 1..5]
+    text documento
+    text impresion
+    int id_empleado
+
+    while(true)
+        Admin!(id)
+        Admin?(id_empleado, documento)
+        impresion = imprimirDocumento(documento)
+        Empleado[id_empleado]!(impresion)
+
+
+process Admin
+    Cola documentos
+    text documento
+    int id_empleado
+    int id_impresora
+
+    do Empleado[*]?(id_empleado, documento) ->
+        documentos.push(id_empleado, documento)
+    [] not documentos.isEmpty(); Impresora[*]?(id_impresora) ->
+        id_empleado, documento = documentos.pop()
+        Impresora[id_impresora]!(id_empleado, documento)
+    od

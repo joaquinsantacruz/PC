@@ -1,0 +1,24 @@
+Monitor Admin
+    ColaEspecial cola
+    cond turno[N]
+    boolean libre = false
+
+    procedure llegada(id: in int; edad: in int)
+        if (libre)
+            libre = false
+        else
+            cola.push(id, edad)
+            wait(turno[id])
+    
+    procedure salida()
+        if (cola.isEmpty())
+            libre = true
+        else
+            signal(turno[cola.pop()])
+
+
+process Persona[id: 0..N-1]
+    int edad = getEdad()
+    Admin.llegada(id, edad)
+    mirar()
+    Admin.salida()

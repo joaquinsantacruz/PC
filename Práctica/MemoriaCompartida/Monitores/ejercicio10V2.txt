@@ -1,0 +1,49 @@
+Monitor Admin
+    cond turno
+    cond emple
+    boolean libre = true
+    boolean limpio = false
+    int esperando = 0
+
+    procedure solicitarLimpieza()
+        if (not libre)      // si esta ocupado
+            wait(emple)
+        else if (limpio)    // si esta limpio
+            wait(emple)
+        libre = false
+
+    procedure liberarLimpieza()
+        limpio = true
+        if (esperando > 0)
+            signal(turno)
+        else
+            libre = true
+
+    procedure solicitar()
+        if (not limpio)     // si esta sucio
+            esperando++
+            wait(turno)
+            esperando--
+        else if (not libre) // si esta ocupado
+            esperando++
+            wait(turno)
+            esperando--
+        libre = false
+    
+    procedure liberar()
+        limpio = false
+        libre = true
+        signal(emple)
+
+
+process Empleado
+    for i=1 to N
+        Admin.solicitarLimpieza()
+        Desinfectar_juego()
+        Admin.liberarLimpieza()
+
+
+process Persona[id:0..N-1]
+    Admin.solicitar()
+    Usar_juego()
+    Admin.liberar()

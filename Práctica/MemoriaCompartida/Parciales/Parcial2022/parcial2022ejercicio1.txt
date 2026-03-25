@@ -1,0 +1,54 @@
+sem fila_estacion_mutex[7] = 1
+ColaEspecial cola_estacion //Cola que lleva una cuenta de la cantidad de elementos
+
+
+process Vehiculo[id: 0..149]
+    int e
+    text comprobante
+
+    P(mutex)
+    cola.push(id)
+    V(mutex)
+    V(llegada)
+    P(esperando[id])
+    e = estacion_asignada[id]
+
+    P(fila_estacion_mutex[e])
+    cola_estacion[e].push(id)
+    V(fila_estacion_mutex[e])
+
+    V(hay_vehiculo[e])
+    P(espera_verificacion[id])
+
+    comprobante = comprobantes[id]
+
+
+process Coordinador
+    for i = 0 to 149
+        P(llegada)
+        P(mutex)
+        int id = cola.pop()
+        V(mutex)
+        estacion_asignada[id] = cola_min(cola_estacion) //Metodo que devuelve la posicion de la cola con menor cantidad de elementos. Hace un P() y V() por cada posicion del vector
+        V(esperando[id])
+
+        for i=0 to 6
+            P(fila_estacion_mutex[i])
+            cant = cola_estacion[i].getCant()
+            V(fila_estacion_mutex[i])
+
+            if (cant < min)
+                min = cant
+                id_min = i
+
+process Estacion[id: 0..6]
+    while(true)
+        text comprobante
+
+        P(hay_vehiculo[id])
+        P(fila_estacion_mutex[id])
+        int idV = cola_estacion[id].pop()
+        V(fila_estacion_mutex[id])
+        --verificar vehiculo idV:in, comprobante:out
+        comprobantes[id] = comprobante
+        V(espera_verificacion[idV])

@@ -1,0 +1,29 @@
+Monitor E/S
+    cond turno[20]
+    ColaEspecial cola
+    boolean libre = true
+
+    procedure solicitarAcceso(id: in int; prioridad: in int)
+        if (libre)
+            libre = false
+        else
+            cola.push(id, prioridad)
+            wait(turno[id])
+
+    
+    procedure liberarAcceso()
+        if (cola.isEmpty())
+            libre = true
+        else
+            signal(turno[cola.pop()])
+
+
+process Proceso[id: 1..20]
+    text result
+
+    while(true)
+        result = Procesar()
+        E/S.solicitarAcceso()
+        escribirArchivo(result)
+        E/S.liberarAcceso()
+    

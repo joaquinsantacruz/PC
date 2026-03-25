@@ -1,0 +1,29 @@
+chan pedido()
+chan documentos(text)
+chan documentos_impresora(text, bolean)
+
+process Administrativo[id: 1..N]
+    text documento
+
+    for i = 1 to 10
+        documento = trabajar()
+        send documentos(documento)
+
+process Impresora[id: 0..2]
+    text documento
+    boolean seguir = true
+    
+    while(seguir)
+        receive documentos_impresora(documento, seguir)
+        if (seguir)
+            imprimir(documento)
+
+process Coordinador
+    text documento
+    
+    for i = 1 to 10 * N
+        receive documentos(documento)
+        send documentos_impresora(documento, true)
+    
+    for i = 1 to 3
+        send documentos_impresora("Vacio", false)

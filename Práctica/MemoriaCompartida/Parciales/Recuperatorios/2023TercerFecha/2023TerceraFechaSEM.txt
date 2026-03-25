@@ -1,0 +1,39 @@
+sem esperando_recarga = 0
+sem avisar_empleado = 0
+sem cola_mutex = 1
+sem esperando_cola[U] = ([U] = 0)
+boolean libre = true
+Cola cola
+int latas = 100
+
+
+process Usuario[id:1..U]
+    P(cola_mutex)
+    if (not libre)
+        cola.push(id)
+        V(cola_mutex)
+        P(esperando_cola[id])
+    else
+        libre = false
+        V(cola_mutex)
+
+    if (latas == 0)
+        V(avisar_empleado)
+        P(esperando_recarga)
+    tomarLata()
+    latas--
+
+    P(cola_mutex)
+    if (cola.isEmpty())
+        libre = true
+    else
+        V(esperando_cola[cola.pop()])
+    V(cola_mutex)
+
+
+process Repositor
+    while(true)
+        P(avisar_empleado)
+        cargarMaquina()
+        latas = 100
+        V(esperando_recarga)

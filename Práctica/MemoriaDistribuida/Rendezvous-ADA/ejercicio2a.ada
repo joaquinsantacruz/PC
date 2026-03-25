@@ -1,0 +1,26 @@
+Procedure Ejercicio2a IS
+    Task Empleado is
+        Entry Atender;
+    End Empleado;
+
+    Task type Cliente;
+    array_clientes: array (1..C) of Cliente;
+
+    Task Body Empleado is
+        loop
+            Accept Atender(pago: IN text; comprobante: OUT text) do
+                comprobante = procesarPago(pago);
+            end Atender;
+        end loop;
+    End Empleado;
+
+    Task Body Cliente is
+        pago: text := ...;
+        comprobante: text;
+
+        Empleado.Atender(pago, comprobante)
+    End Cliente;
+
+    Begin
+        null;
+    End Ejercicio2a;

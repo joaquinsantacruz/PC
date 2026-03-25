@@ -1,0 +1,29 @@
+sem esperando = 0
+sem atencion[50] = ([50] = 0)
+sem cola_mutex = 1
+Cola cola
+
+
+process Empleado
+    int id_persona
+    Cola vacunados
+
+    for i=1 to 10
+        for j=1 to 5
+            P(esperando)
+        for j=1 to 5
+            P(cola_mutex)
+            id_persona = cola.pop()
+            V(cola_mutex)
+            VacunarPersona(id_persona)
+            vacunados.push(id_persona)
+        for j=1 to 5
+            V(atencion[vacunados.pop()])
+
+
+process Persona[id:0..49]
+    P(cola_mutex)
+    cola.push(id)
+    V(cola_mutex)
+    V(esperando)
+    P(atencion[id])

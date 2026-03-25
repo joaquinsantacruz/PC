@@ -1,0 +1,23 @@
+sem mutex = 1
+boolean libre = true
+Cola cola
+sem esperando[P] = ([P] = 0)
+
+process Persona[id: 0..P-1]:
+    P(mutex)
+    if (libre)
+        libre = false
+        V(mutex)
+    else
+        cola.push(id)
+        V(mutex)
+        P(esperando[id])
+    
+    UsarTerminal()
+
+    P(mutex)
+    if (cola.isEmpty())
+        libre = true
+    else
+        V(esperando[cola.pop()])
+    V(mutex)

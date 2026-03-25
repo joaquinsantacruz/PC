@@ -1,0 +1,49 @@
+process Organizador
+    text desafio
+    int id_competidor
+
+    for i in 1..C
+        Competidor[*]?(id_competidor)
+        Competidor[id_competidor]!(desafio)
+
+
+process Escritorio
+    Cola entregas
+    text entrega
+    int id_supervisor
+    
+    do Competidor[*]?(id_competidor, entrega) ->
+        entregas.push(id_competidor, entrega)
+    [] not entregas.isEmpty(); Supervisor[*]?(id_supervisor) ->
+        Supervisor[id_supervisor]!(entregas.pop())
+    od
+
+
+process Competidor[id: 1..C]
+    text desafio
+    text entrega
+    text correcion
+
+    Organizador!(id)
+    Organizador?(desafio)
+
+    entrega = resolverDesafio(desafio)
+    Escritorio!(id, entrega)
+
+    Supervisor[*]?(entrega, correcion)
+    while (not correcion = "Bien resuelto")
+        entrega = corregirEntrega(entrega, correcion)
+        Escritorio!(id, entrega)
+        Supervisor[*]?(entrega, correcion)
+
+
+process Supervisor[id: 1..S]
+    int id_competidor
+    text entrega
+    text correcion
+
+    while(true)
+        Escritorio!(id)
+        Escritorio?(id_competidor, entrega)
+        correcion = corregirDesafio(entrega)
+        Competidor[id_competidor]!(correcion) 

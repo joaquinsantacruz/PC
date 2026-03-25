@@ -1,0 +1,68 @@
+sem fila_llegada_mutex = 1
+Cola fila_llegada
+
+sem pasajero_esperando = 0
+
+sem cant_fila_enfermera_mutex = 1
+int cant_fila_enfermera[3]
+
+sem fila_enfermera_mutex[3] = ([3] = 1)
+Cola fila_enfermera[3]
+
+sem atencion[150] = ([150] = 0)
+int enfermera_elegida[150]
+
+sem hay_pasajero[3] = ([3] = 0)
+
+process Pasajero[id:0..149]
+    int id_enfermera
+
+    P(fila_llegada_mutex)
+    fila_llegada.push(id)
+    V(fila_llegada_mutex)
+
+    V(pasajero_esperando)
+
+    P(atencion[id])
+    id_enfermera = enfermera_elegida[id]
+
+    P(fila_enfermera_mutex[id_enfermera])
+    fila_enfermera[id_enfermera].push(id)
+    V(fila_enfermera_mutex)
+
+    V(hay_pasajero[id_enfermera])
+
+    P(atencion[id])
+
+process Recepcionista
+    int id_enfermera
+    int id_pasajero
+
+    for i=1 to 150
+        P(pasajero_esperando)
+
+        P(fila_llegada_mutex)
+        id_pasajero = fila_llegada.pop()
+        V(fila_llegada_mutex)
+
+        P(cant_fila_enfermera_mutex)
+        id_enfermera = indexMin(cant_fila_enfermera)
+        cant_fila_enfermera[id_enfermera]++
+        V(cant_fila_enfermera_mutex)
+
+        enfermera_elegida[id_pasajero] = id_enfermera
+        V(atencion[id_pasajero])
+
+process Enfermera[id:0..2]
+    int id_pasajero
+    
+    while(true)
+        P(hay_pasajero[id])
+
+        P(fila_enfermera_mutex)
+        id_pasajero = fila_enfermera[id].pop()
+        V(fila_enfermera_mutex)
+
+        Hisopar(id_pasajero)
+
+        V(atencion[id_pasajero])

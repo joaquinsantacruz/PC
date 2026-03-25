@@ -1,0 +1,24 @@
+process Espectador[id: 1..E]
+    text bebida
+
+    Admin!llegada(id)
+    Admin?habilitarMaquina()
+    bebida = tomarBebida()
+    Admin!dejarMaquina!()
+
+process Admin
+    Cola espectadores
+    int id_espectador
+    boolean libre = true
+
+    do Espectador[*]?llegada(id_espectador) ->
+        if (libre)
+            Espectador[id_espectador]!habilitarMaquina()
+            libre = false
+        else
+            espectadores.push(id_espectador)
+    [] not libre; Espectador[*]?dejarMaquina() ->
+        if (espectadores.isEmpty())
+            libre = true
+        else
+            Espectador[espectadores.pop()]!habilitarMaquina()

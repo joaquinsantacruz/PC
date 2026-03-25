@@ -1,0 +1,60 @@
+process Jugador[id: 0..19]
+    int equipo = DarEquipo()
+    int numero_cancha
+
+    Equipo[equipo].llegada(numero_cancha)
+    Cancha[numero_cancha].llegada()
+
+
+
+process Partido[id: 1..2]
+    Cancha[id].iniciar()
+    Delay(50)
+    Cancha[id].finalizar()
+
+
+
+Monitor Equipo[id: 0..3]
+    int jugadores = 0
+    int cancha = 0
+
+    procedure llegada(int numero_cancha:out)
+        jugadores++
+        if (jugadores == 5)
+            Recepcion.darCancha(cancha)
+            signal_all(barrera)
+        else
+            wait(barrera)
+        numero_cancha = cancha
+
+
+
+Monitor Cancha[id: 0..1]
+    int jugadores = 0
+    cond inicio
+    cond fin
+
+    procedure llegada()
+        jugadores++
+        if (jugadores == 10)
+            signal(incio)
+        wait(fin)
+
+    procedure iniciar()
+        if (jugadores < 10)
+            wait(inicio)
+
+    procedure finalizar()
+        signal_all(fin)
+
+
+
+Monitor Recepcion
+    int equipos = 0
+
+    procedure darCancha(int cancha:out)
+        equipos++
+        if (equipos < 3)
+            cancha = 0
+        else
+            cancha = 1
